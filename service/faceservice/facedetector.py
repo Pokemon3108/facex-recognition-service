@@ -9,8 +9,10 @@ class FaceDetector:
 
     def buildFaceCoordinates(self, imagePath):
         image = cv2.imread(imagePath)
-        print(image)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return self.buildFaceCoordinatesFromImageBytes(image)
+
+    def buildFaceCoordinatesFromImageBytes(self, imageBytes):
+        gray = cv2.cvtColor(imageBytes, cv2.COLOR_BGR2GRAY)
 
         # Detect faces in the image
         return self.faceCascade.detectMultiScale(
