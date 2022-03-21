@@ -1,9 +1,9 @@
 from service.faceservice.facemodel import FaceModel
 
 
-def buildModelsFaceCoordinates(coordinates):
-    faceModels = []
+def build_models_face_coordinates(coordinates):
+    face_models = []
     for (x, y, w, h) in coordinates:
-        faceModel = FaceModel(x, y, w, h)
-        faceModels.append(faceModel)
-    return faceModels
+        face_model = FaceModel(x, y, w, h)
+        face_models.append(face_model)
+    return face_models

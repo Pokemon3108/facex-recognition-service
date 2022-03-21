@@ -7,12 +7,12 @@ class FaceDetector:
     def __init__(self) -> None:
         self.faceCascade = cv2.CascadeClassifier(self.cascadePath)
 
-    def buildFaceCoordinates(self, imagePath):
-        image = cv2.imread(imagePath)
-        return self.buildFaceCoordinatesFromImageBytes(image)
+    def build_face_coordinates(self, image_path):
+        image = cv2.imread(image_path)
+        return self.build_face_coordinates_from_image_bytes(image)
 
-    def buildFaceCoordinatesFromImageBytes(self, imageBytes):
-        gray = cv2.cvtColor(imageBytes, cv2.COLOR_BGR2GRAY)
+    def build_face_coordinates_from_image_bytes(self, image_Bytes):
+        gray = cv2.cvtColor(image_Bytes, cv2.COLOR_BGR2GRAY)
 
         # Detect faces in the image
         return self.faceCascade.detectMultiScale(
