@@ -1,4 +1,4 @@
-from service.faceservice.facemodel import FaceModel
+from service.faceservice.model.facemodel import FaceModel
 
 
 def build_models_face_coordinates(coordinates):

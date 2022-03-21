@@ -1,9 +1,9 @@
 import tensorflow as tf
-from keras import backend, layers, metrics
-from keras.applications.xception import Xception
-from keras.models import Model, Sequential
+from keras import layers, metrics
+from keras.models import Model
 
 from service.faceservice.neuralnetworkmodel.distancelayer import DistanceLayer
+from service.faceservice.neuralnetworkmodel.encoder import get_encoder
 
 
 class SiameseModel(Model):
@@ -47,29 +47,6 @@ class SiameseModel(Model):
         return [self.loss_tracker]
 
 
-def get_encoder(input_shape):
-    """ Returns the image encoding model """
-    pretrained_model = Xception(
-        input_shape=input_shape,
-        weights='imagenet',
-        include_top=False,
-        pooling='avg',
-    )
-
-    for i in range(len(pretrained_model.layers) - 27):
-        pretrained_model.layers[i].trainable = False
-
-    encode_model = Sequential([
-        pretrained_model,
-        layers.Flatten(),
-        layers.Dense(512, activation='relu'),
-        layers.BatchNormalization(),
-        layers.Dense(256, activation="relu"),
-        layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
-    ], name="Encode_Model")
-    return encode_model
-
-
 def get_siamese_network(input_shape=(128, 128, 3)):
     encoder = get_encoder(input_shape)
 
@@ -92,6 +69,3 @@ def get_siamese_network(input_shape=(128, 128, 3)):
         name="Siamese_Network"
     )
     return siamese_network
-
-siamese_network = get_siamese_network()
-siamese_network.summary()

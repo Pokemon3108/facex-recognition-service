@@ -2,7 +2,8 @@ import time
 
 import numpy as np
 
-from service.faceservice.neuralnetworkmodel.networkmodel import get_encoder, SiameseModel, get_siamese_network
+from service.faceservice.neuralnetworkmodel.encoder import get_encoder
+from service.faceservice.neuralnetworkmodel.networkmodel import SiameseModel, get_siamese_network
 
 
 def extract_encoder(model):

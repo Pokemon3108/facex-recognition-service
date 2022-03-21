@@ -8,7 +8,7 @@ from flask import Flask, request
 
 from service.faceservice.facedetector import FaceDetector
 from service.faceservice.facerecognizer import FaceRecognizer
-from service.modelconverter import build_models_face_coordinates
+from service.faceccoordinatesmodelconverter import build_models_face_coordinates
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -32,10 +32,10 @@ def detect():
     pic = request.files['pic']
     image_bytes = Image.open(io.BytesIO(pic.read()))
 
-    opencvImage = cv2.cvtColor(np.array(image_bytes), cv2.COLOR_RGB2BGR)
+    opencv_image = cv2.cvtColor(np.array(image_bytes), cv2.COLOR_RGB2BGR)
 
     face_detector = FaceDetector()
-    coordinates = face_detector.build_face_coordinates_from_image_bytes(opencvImage)
+    coordinates = face_detector.build_face_coordinates_from_image_bytes(opencv_image)
     face_models = build_models_face_coordinates(coordinates)
 
     return json.dumps([fm.__dict__ for fm in face_models]), 200
@@ -47,7 +47,7 @@ def recognize():
     image_bytes = Image.open(io.BytesIO(pic.read()))
     opencvImage = cv2.cvtColor(np.array(image_bytes), cv2.COLOR_RGB2BGR)
     print(face_recognizer.recognize(opencvImage, known_faces))
-    return "111", 200
+    return "Recognition is successful", 200
 
 # import time
 #
