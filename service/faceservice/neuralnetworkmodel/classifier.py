@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from service.faceservice.neuralnetworkmodel.encoder import get_encoder
-from service.faceservice.neuralnetworkmodel.networkmodel import SiameseModel, get_siamese_network
+from service.faceservice.neuralnetworkmodel.network_model import SiameseModel, get_siamese_network
 
 
 def extract_encoder(model):
@@ -24,7 +24,7 @@ def classify_images(face_list1, face_list2, threshold=1.3):
     print("--- %s seconds ---" % (time.time() - start_time))
 
     distance = np.sum(np.square(tensor1 - tensor2), axis=-1)
-    prediction = np.where(distance <= threshold, 0, 1)
+    prediction = np.where(distance <= threshold, distance, 1)
     return prediction
 
 
