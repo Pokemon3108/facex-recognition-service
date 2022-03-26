@@ -6,10 +6,11 @@ import numpy as np
 from PIL import Image
 from flask import Flask, request
 
-from service.databaseservice.face_data_dao import save_known_face
-from service.faceservice.face_detector import FaceDetector
-from service.faceservice.model_converter import build_models_face_coordinates, dictionary_faces_to_face_bytes_model
-from service.fileservice.file_processor import get_known_faces
+from service.databaseservice.face_data_dao import get_all_faces
+from service.faceservice.detection.face_detector import FaceDetector
+from service.faceservice.model_converter import build_models_face_coordinates, file_storage_to_opencv_image, \
+    extract_faces_arr_from_face_dict
+from service.faceservice.recognition.face_recognizer import FaceRecognizer
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -18,14 +19,16 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.run(debug=True)
 
+face_data_folder_path = "/archive/User Faces"
 
-@app.before_first_request
-def run_on_start():
-    face_data_folder_path = "/archive/User Faces"
-    known_faces = get_known_faces(face_data_folder_path)
-    known_faces_model = dictionary_faces_to_face_bytes_model(known_faces)
-    for f in known_faces_model:
-        save_known_face(f.__dict__)
+
+# @app.before_first_request
+# def run_on_start():
+#     face_data_folder_path = "/archive/User Faces"
+#     known_faces = get_known_faces(face_data_folder_path)
+#     known_faces_model = dictionary_faces_to_face_bytes_model(known_faces)
+#     for f in known_faces_model:
+#         save_known_face(f.__dict__)
 
 
 @app.route('/')
@@ -50,7 +53,11 @@ def detect():
 @app.route('/api/v1/recognition', methods=['POST'])
 def recognize():
     pic = request.files['pic']
-    image_bytes = Image.open(io.BytesIO(pic.read()))
-    opencvImage = cv2.cvtColor(np.array(image_bytes), cv2.COLOR_RGB2BGR)
-    # add recognition, read image bytes from database
+    opencv_image = file_storage_to_opencv_image(pic)
+
+    face_recognizer = FaceRecognizer()
+    known_faces = get_all_faces()
+    known_faces_arr = extract_faces_arr_from_face_dict(known_faces)
+    face_recognizer.recognize(opencv_image, known_faces_arr)
+
     return "Recognition is successful", 200

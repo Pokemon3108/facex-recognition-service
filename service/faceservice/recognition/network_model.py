@@ -2,8 +2,8 @@ import tensorflow as tf
 from keras import layers, metrics
 from keras.models import Model
 
-from service.faceservice.neuralnetworkmodel.distance_layer import DistanceLayer
-from service.faceservice.neuralnetworkmodel.encoder import get_encoder
+from service.faceservice.recognition.distance_layer import DistanceLayer
+from service.faceservice.recognition.encoder import get_encoder
 
 
 class SiameseModel(Model):
