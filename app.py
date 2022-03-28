@@ -9,6 +9,7 @@ from flask import Flask, request
 from service.databaseservice.face_db_service import FaceDbService
 from service.faceservice.detection.face_detector import FaceDetector
 from service.faceservice.model_converter import ModelConverter
+from service.faceservice.recognition.distance_service import DistanceService
 from service.faceservice.recognition.face_recognizer import FaceRecognizer
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
@@ -63,9 +64,13 @@ def recognize():
     known_faces_arr = list(map(lambda model: model_converter.extract_faces_bytes_from_model(model), known_faces))
 
     face_recognizer = FaceRecognizer()
-    face_recognizer.recognize(opencv_image, known_faces_arr)
+    distance_arr = face_recognizer.recognize(opencv_image, known_faces_arr)
 
-    return "Recognition is successful", 200
+    distance_service = DistanceService()
+    min_distance_index = face_recognizer.get_smallest_distance_index(distance_arr)
+    recognized_name = known_faces[min_distance_index].name
+
+    return recognized_name, 200
 
 
 @app.route('/api/v1/recognition/user/<name>', methods=['POST'])
@@ -79,6 +84,10 @@ def check_if_user_is_real(name):
     face_bytes_np = [model_converter.extract_faces_bytes_from_model(face_bytes_model)]
 
     face_recognizer = FaceRecognizer()
-    face_recognizer.recognize(opencv_image, face_bytes_np)
+    distance_arr = face_recognizer.recognize(opencv_image, face_bytes_np)
 
-    return "Recognition is successful", 200
+    distance_service = DistanceService()
+    face_matches_username = distance_service.check_if_distance_is_small(distance_arr[0])
+
+
+    return face_matches_username.__str__(), 200
