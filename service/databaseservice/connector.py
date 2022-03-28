@@ -11,6 +11,9 @@ class MongoConnector:
     def save(self, obj_to_save):
         self.collection.insert_one(obj_to_save)
 
+    def search(self, search_criteria):
+        return self.collection.find_one(search_criteria)
+
     def read_all(self):
         return self.collection.find({})
 
