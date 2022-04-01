@@ -67,7 +67,7 @@ def recognize():
     distance_arr = face_recognizer.recognize(opencv_image, known_faces_arr)
 
     distance_service = DistanceService()
-    min_distance_index = face_recognizer.get_smallest_distance_index(distance_arr)
+    min_distance_index = distance_service.get_smallest_distance_index(distance_arr)
     recognized_name = known_faces[min_distance_index].name
 
     return recognized_name, 200
@@ -88,6 +88,5 @@ def check_if_user_is_real(name):
 
     distance_service = DistanceService()
     face_matches_username = distance_service.check_if_distance_is_small(distance_arr[0])
-
 
     return face_matches_username.__str__(), 200
