@@ -4,8 +4,9 @@ import json
 import cv2
 import numpy as np
 from PIL import Image
-from flask import Flask, request
+from flask import Flask, request, abort, jsonify
 
+from exception.not_found_exception import NotFoundException
 from service.databaseservice.face_db_service import FaceDbService
 from service.faceservice.detection.face_detector import FaceDetector
 from service.faceservice.model_converter import ModelConverter
@@ -22,15 +23,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.run(debug=True)
 
 face_data_folder_path = "/archive/User Faces"
-
-
-# @app.before_first_request
-# def run_on_start():
-#     face_data_folder_path = "/archive/User Faces"
-#     known_faces = get_known_faces(face_data_folder_path)
-#     known_faces_model = dictionary_faces_to_face_bytes_model(known_faces)
-#     for f in known_faces_model:
-#         save_known_face(f.__dict__)
 
 
 @app.route('/')
@@ -83,6 +75,8 @@ def check_if_user_is_real(name):
     model_converter = ModelConverter()
     face_db_service = FaceDbService()
     face_bytes_model = face_db_service.get_face_by_username(name)
+    if face_bytes_model is None:
+        raise NotFoundException("No face was found.")
     face_bytes_np = [model_converter.extract_faces_bytes_from_model(face_bytes_model)]
 
     face_recognizer = FaceRecognizer()
@@ -92,6 +86,11 @@ def check_if_user_is_real(name):
     face_matches_username = distance_service.check_if_distance_is_small(distance_arr[0])
 
     return face_matches_username.__str__(), 200
+
+
+@app.errorhandler(NotFoundException)
+def invalid_api_usage(e):
+    return jsonify(e.to_dict()), e.status_code
 
 
 def process_image_from_request(pic):
