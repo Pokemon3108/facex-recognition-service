@@ -8,8 +8,19 @@ from service.faceservice.recognition.network_model import SiameseModel, get_siam
 
 class Classifier:
 
+    def __init__(self):
+        self.__weight = 128
+        self.__height = 128
+        self.__channels_amount = 3
+
+    def get_weight(self):
+        return self.__weight
+
+    def get_height(self):
+        return self.__height
+
     def extract_encoder(self, model):
-        layer_encoder = get_encoder((128, 128, 3))
+        layer_encoder = get_encoder((self.__weight, self.__height, self.__channels_amount))
         i = 0
         for e_layer in model.layers[0].layers[3].layers:
             layer_weight = e_layer.get_weights()

@@ -9,8 +9,10 @@ from flask import Flask, request
 from service.databaseservice.face_db_service import FaceDbService
 from service.faceservice.detection.face_detector import FaceDetector
 from service.faceservice.model_converter import ModelConverter
+from service.faceservice.recognition.classifier import Classifier
 from service.faceservice.recognition.distance_service import DistanceService
 from service.faceservice.recognition.face_recognizer import FaceRecognizer
+from service.imageservice.image_processor import ImageProcessor
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -57,7 +59,7 @@ def recognize():
     model_converter = ModelConverter()
 
     pic = request.files['pic']
-    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+    opencv_image = process_image_from_request(pic)
 
     face_db_service = FaceDbService()
     known_faces = face_db_service.get_all_faces()
@@ -75,10 +77,10 @@ def recognize():
 
 @app.route('/api/v1/recognition/user/<name>', methods=['POST'])
 def check_if_user_is_real(name):
-    model_converter = ModelConverter()
     pic = request.files['pic']
-    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+    opencv_image = process_image_from_request(pic)
 
+    model_converter = ModelConverter()
     face_db_service = FaceDbService()
     face_bytes_model = face_db_service.get_face_by_username(name)
     face_bytes_np = [model_converter.extract_faces_bytes_from_model(face_bytes_model)]
@@ -90,3 +92,12 @@ def check_if_user_is_real(name):
     face_matches_username = distance_service.check_if_distance_is_small(distance_arr[0])
 
     return face_matches_username.__str__(), 200
+
+
+def process_image_from_request(pic):
+    model_converter = ModelConverter()
+    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+
+    classifier = Classifier()
+    image_processor = ImageProcessor()
+    return image_processor.resize(opencv_image, classifier.get_weight(), classifier.get_height())
