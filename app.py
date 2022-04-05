@@ -4,7 +4,7 @@ import json
 import cv2
 import numpy as np
 from PIL import Image
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request
 
 from exception.not_found_exception import NotFoundException
 from service.databaseservice.face_db_service import FaceDbService
@@ -88,11 +88,6 @@ def check_if_user_is_real(name):
     return face_matches_username.__str__(), 200
 
 
-@app.errorhandler(NotFoundException)
-def invalid_api_usage(e):
-    return jsonify(e.to_dict()), e.status_code
-
-
 def process_image_from_request(pic):
     model_converter = ModelConverter()
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
@@ -100,3 +95,6 @@ def process_image_from_request(pic):
     classifier = Classifier()
     image_processor = ImageProcessor()
     return image_processor.resize(opencv_image, classifier.get_weight(), classifier.get_height())
+
+
+import web.error_processor
