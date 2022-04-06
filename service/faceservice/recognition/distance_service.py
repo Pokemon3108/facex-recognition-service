@@ -6,4 +6,4 @@ class DistanceService:
         return np.argmin(arr)
 
     def check_if_distance_is_small(self, distance):
-        return distance < 1
+        return bool(distance < 1)
