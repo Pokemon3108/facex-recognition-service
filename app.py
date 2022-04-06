@@ -7,6 +7,7 @@ from PIL import Image
 from flask import Flask, request
 
 from exception.not_found_exception import NotFoundException
+from service.databaseservice.face_bytes_model import FaceBytesModel
 from service.databaseservice.face_db_service import FaceDbService
 from service.faceservice.detection.face_detector import FaceDetector
 from service.faceservice.model_converter import ModelConverter
@@ -30,7 +31,7 @@ def ping():
     return 'Hello, World!'
 
 
-@app.route('/api/v1/detection', methods=['POST'])
+@app.route('/api/v1/detection', methods=['GET'])
 def detect():
     pic = request.files['pic']
     image_bytes = Image.open(io.BytesIO(pic.read()))
@@ -46,16 +47,16 @@ def detect():
     return json.dumps([fm.__dict__ for fm in face_models]), 200
 
 
-@app.route('/api/v1/recognition', methods=['POST'])
+@app.route('/api/v1/recognition', methods=['GET'])
 def recognize():
     model_converter = ModelConverter()
 
     pic = request.files['pic']
-    opencv_image = process_image_from_request(pic)
+    opencv_image = resize(pic)
 
     face_db_service = FaceDbService()
     known_faces = face_db_service.get_all_faces()
-    known_faces_arr = list(map(lambda model: model_converter.extract_faces_bytes_from_model(model), known_faces))
+    known_faces_arr = list(map(lambda model: model_converter.extract_np_faces_bytes_from_model(model), known_faces))
 
     face_recognizer = FaceRecognizer()
     distance_arr = face_recognizer.recognize(opencv_image, known_faces_arr)
@@ -67,17 +68,17 @@ def recognize():
     return recognized_name, 200
 
 
-@app.route('/api/v1/recognition/user/<name>', methods=['POST'])
+@app.route('/api/v1/recognition/user/<name>', methods=['GET'])
 def check_if_user_is_real(name):
     pic = request.files['pic']
-    opencv_image = process_image_from_request(pic)
+    opencv_image = resize(pic)
 
     model_converter = ModelConverter()
     face_db_service = FaceDbService()
     face_bytes_model = face_db_service.get_face_by_username(name)
     if face_bytes_model is None:
         raise NotFoundException("No face was found.")
-    face_bytes_np = [model_converter.extract_faces_bytes_from_model(face_bytes_model)]
+    face_bytes_np = [model_converter.extract_np_faces_bytes_from_model(face_bytes_model)]
 
     face_recognizer = FaceRecognizer()
     distance_arr = face_recognizer.recognize(opencv_image, face_bytes_np)
@@ -88,7 +89,20 @@ def check_if_user_is_real(name):
     return face_matches_username.__str__(), 200
 
 
-def process_image_from_request(pic):
+@app.route('/api/v1/user/<name>', methods=['POST'])
+def upload_user_face(name):
+    pic = request.files['pic']
+    opencv_resized_image = resize(pic)
+
+    model_converter = ModelConverter()
+    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_resized_image))
+
+    face_db_service = FaceDbService()
+    face_db_service.save_known_face(model.__dict__)
+    return "Loaded!", 200
+
+
+def resize(pic):
     model_converter = ModelConverter()
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
 

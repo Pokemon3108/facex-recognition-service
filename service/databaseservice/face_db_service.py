@@ -3,7 +3,6 @@ from service.databaseservice.face_bytes_model import FaceBytesModel
 
 
 class FaceDbService:
-
     connector = MongoConnector(db_name='facex',
                                collection_name='faceData',
                                hostname="localhost",

@@ -31,6 +31,8 @@ class ModelConverter:
         image_bytes = Image.open(io.BytesIO(file_storage.read()))
         return cv2.cvtColor(np.array(image_bytes), cv2.COLOR_RGB2BGR)
 
-    def extract_faces_bytes_from_model(self, model):
-        return np.load(BytesIO(model.bytes), allow_pickle=True)
+    def opencv_image_to_bytes(self, opencv_image):
+        return Binary(pickle.dumps(opencv_image, protocol=2))
 
+    def extract_np_faces_bytes_from_model(self, model):
+        return np.load(BytesIO(model.bytes), allow_pickle=True)
