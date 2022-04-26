@@ -3,7 +3,7 @@ from keras import layers, metrics
 from keras.models import Model
 
 from service.faceservice.recognition.distance_layer import DistanceLayer
-from service.faceservice.recognition.encoder import get_encoder
+from service.faceservice.recognition.encoder import  EncoderBuilder
 
 
 class SiameseModel(Model):
@@ -11,9 +11,9 @@ class SiameseModel(Model):
     def __init__(self, siamese_network, margin=1.0):
         super(SiameseModel, self).__init__()
 
-        self.margin = margin
+        self.__margin = margin
         self.siamese_network = siamese_network
-        self.loss_tracker = metrics.Mean(name="loss")
+        self.__loss_tracker = metrics.Mean(name="loss")
 
     def call(self, inputs):
         return self.siamese_network(inputs)
@@ -26,14 +26,14 @@ class SiameseModel(Model):
         gradients = tape.gradient(loss, self.siamese_network.trainable_weights)
         self.optimizer.apply_gradients(zip(gradients, self.siamese_network.trainable_weights))
 
-        self.loss_tracker.update_state(loss)
-        return {"loss": self.loss_tracker.result()}
+        self.__loss_tracker.update_state(loss)
+        return {"loss": self.__loss_tracker.result()}
 
     def test_step(self, data):
         loss = self._compute_loss(data)
 
-        self.loss_tracker.update_state(loss)
-        return {"loss": self.loss_tracker.result()}
+        self.__loss_tracker.update_state(loss)
+        return {"loss": self.__loss_tracker.result()}
 
     def _compute_loss(self, data):
         # Get the two distances from the network, then compute the triplet loss
@@ -44,11 +44,12 @@ class SiameseModel(Model):
     @property
     def metrics(self):
         # We need to list our metrics so the reset_states() can be called automatically.
-        return [self.loss_tracker]
+        return [self.__loss_tracker]
 
 
 def get_siamese_network(input_shape=(128, 128, 3)):
-    encoder = get_encoder(input_shape)
+    encoder_builder = EncoderBuilder()
+    encoder = encoder_builder.get_encoder(input_shape)
 
     # Input Layers for the images
     anchor_input = layers.Input(input_shape, name="Anchor_Input")
@@ -63,9 +64,9 @@ def get_siamese_network(input_shape=(128, 128, 3)):
     )
 
     # Creating the Model
-    siamese_network = Model(
+    siamese_network_model = Model(
         inputs=[anchor_input, positive_input, negative_input],
         outputs=distances,
         name="Siamese_Network"
     )
-    return siamese_network
+    return siamese_network_model

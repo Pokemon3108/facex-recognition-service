@@ -3,23 +3,23 @@ from service.databaseservice.face_bytes_model import FaceBytesModel
 
 
 class FaceDbService:
-    connector = MongoConnector(db_name='facex',
+    __connector = MongoConnector(db_name='facex',
                                collection_name='faceData',
                                hostname="localhost",
                                port=27017)
 
     def save_known_face(self, obj_to_save):
-        self.connector.save(obj_to_save)
+        self.__connector.save(obj_to_save)
 
     def get_face_by_username(self, username) -> FaceBytesModel | None:
         search_criteria = {'name': username}
-        doc = self.connector.search(search_criteria)
+        doc = self.__connector.search(search_criteria)
         if doc is None:
             return None
         return FaceBytesModel(doc['name'], doc['bytes'])
 
     def get_all_faces(self) -> list[FaceBytesModel]:
-        cursor = self.connector.read_all()
+        cursor = self.__connector.read_all()
         faces_model_arr = []
         for doc in cursor:
             face_name = doc['name']

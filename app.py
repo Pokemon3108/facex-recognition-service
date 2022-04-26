@@ -4,7 +4,7 @@ import json
 import cv2
 import numpy as np
 from PIL import Image
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 from exception.many_faces_exception import ManyFacesException
 from exception.not_found_exception import NotFoundException
@@ -27,15 +27,12 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.run(debug=True)
 
-face_data_folder_path = "/archive/User Faces"
-
-
 @app.route('/')
 def ping():
     return 'Hello, World!'
 
 
-@app.route('/api/v1/detection', methods=['GET'])
+@app.route('/api/v1/detection', methods=['POST'])
 def detect():
     pic = request.files['pic']
     image_bytes = Image.open(io.BytesIO(pic.read()))
@@ -51,7 +48,7 @@ def detect():
     return json.dumps([fm.__dict__ for fm in face_models]), 200
 
 
-@app.route('/api/v1/recognition', methods=['GET'])
+@app.route('/api/v1/recognition', methods=['POST'])
 def recognize():
     model_converter = ModelConverter()
     face_validator = FaceValidator()
@@ -59,7 +56,7 @@ def recognize():
     pic = request.files['pic']
     opencv_image = resize(pic)
 
-    if face_validator.is_one_face_on_image(opencv_image):
+    if not face_validator.is_one_face_on_image(opencv_image):
         raise ManyFacesException("There are no faces on image or more than 1.")
 
     face_db_service = FaceDbService()
@@ -75,10 +72,10 @@ def recognize():
 
     recognized_name_model = RecognizedNameModel(recognized_name, True)
 
-    return json.dumps(recognized_name_model.__dict__), 200
+    return jsonify(recognized_name_model.__dict__), 200
 
 
-@app.route('/api/v1/recognition/user/<name>', methods=['GET'])
+@app.route('/api/v1/recognition/user/<name>', methods=['POST'])
 def check_if_user_is_real(name):
     pic = request.files['pic']
     opencv_image = resize(pic)
@@ -91,7 +88,7 @@ def check_if_user_is_real(name):
     face_db_service = FaceDbService()
     face_bytes_model = face_db_service.get_face_by_username(name)
     if face_bytes_model is None:
-        raise NotFoundException("No face was found.")
+        raise NotFoundException("No face of this username was found in database.")
     face_bytes_np = [model_converter.extract_np_faces_bytes_from_model(face_bytes_model)]
 
     face_recognizer = FaceRecognizer()
@@ -125,6 +122,5 @@ def resize(pic):
     classifier = Classifier()
     image_processor = ImageProcessor()
     return image_processor.resize(opencv_image, classifier.get_weight(), classifier.get_height())
-
 
 import web.error_processor

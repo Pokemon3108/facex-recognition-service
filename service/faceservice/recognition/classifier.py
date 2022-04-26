@@ -1,14 +1,13 @@
-import time
-
 import numpy as np
 
-from service.faceservice.recognition.encoder import get_encoder
+from service.faceservice.recognition.encoder import EncoderBuilder
 from service.faceservice.recognition.network_model import SiameseModel, get_siamese_network
 
 
 class Classifier:
 
     def __init__(self):
+        self.__model_builder = EncoderBuilder()
         self.__weight = 128
         self.__height = 128
         self.__channels_amount = 3
@@ -20,7 +19,7 @@ class Classifier:
         return self.__height
 
     def extract_encoder(self, model):
-        layer_encoder = get_encoder((self.__weight, self.__height, self.__channels_amount))
+        layer_encoder = self.__model_builder.get_encoder((self.__weight, self.__height, self.__channels_amount))
         i = 0
         for e_layer in model.layers[0].layers[3].layers:
             layer_weight = e_layer.get_weights()

@@ -1,17 +1,16 @@
 class ManyFacesException(Exception):
-    status_code = 400
+    __status_code = 400
 
-    def __init__(self, message, status_code=None, payload=None):
+    def __init__(self, message, status_code=None):
         super().__init__()
-        self.message = message
+        self.__message = message
         if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
+            self.__status_code = status_code
 
     def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
+        rv = dict(())
+        rv['message'] = self.__message
         return rv
 
     def get_status_code(self):
-        return self.status_code
+        return self.__status_code
