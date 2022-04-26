@@ -9,8 +9,8 @@ from flask import Flask, request, jsonify
 from exception.many_faces_exception import ManyFacesException
 from exception.not_found_exception import NotFoundException
 from service.databaseservice.face_bytes_model import FaceBytesModel
-from service.databaseservice.face_db_service import FaceDbService
 from service.faceservice.detection.face_detector import FaceDetector
+from service.faceservice.face_bytes_service import FaceBytesService
 from service.faceservice.model_converter import ModelConverter
 from service.faceservice.recognition.classifier import Classifier
 from service.faceservice.recognition.distance_service import DistanceService
@@ -59,8 +59,8 @@ def recognize():
     if not face_validator.is_one_face_on_image(opencv_image):
         raise ManyFacesException("There are no faces on image or more than 1.")
 
-    face_db_service = FaceDbService()
-    known_faces = face_db_service.get_all_faces()
+    face_bytes_service = FaceBytesService()
+    known_faces = face_bytes_service.read_all_faces()
     known_faces_arr = list(map(lambda model: model_converter.extract_np_faces_bytes_from_model(model), known_faces))
 
     face_recognizer = FaceRecognizer()
@@ -85,8 +85,8 @@ def check_if_user_is_real(name):
         raise ManyFacesException("There are no faces on image or more than 1.")
 
     model_converter = ModelConverter()
-    face_db_service = FaceDbService()
-    face_bytes_model = face_db_service.get_face_by_username(name)
+    face_bytes_service = FaceBytesService()
+    face_bytes_model = face_bytes_service.read_face_by_username(name)
     if face_bytes_model is None:
         raise NotFoundException("No face of this username was found in database.")
     face_bytes_np = [model_converter.extract_np_faces_bytes_from_model(face_bytes_model)]
@@ -110,9 +110,22 @@ def upload_user_face(name):
     model_converter = ModelConverter()
     model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_resized_image))
 
-    face_db_service = FaceDbService()
-    face_db_service.save_known_face(model.__dict__)
-    return Message("Face was successfully loaded").__dict__, 200
+    face_bytes_service = FaceBytesService()
+    face_bytes_service.save_face(model)
+    return Message("Face was successfully loaded.").__dict__, 200
+
+
+@app.route('/api/v1/user/<name>', methods=['PUT'])
+def update_user_face(name):
+    pic = request.files['pic']
+    opencv_resized_image = resize(pic)
+
+    model_converter = ModelConverter()
+    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_resized_image))
+
+    face_bytes_service = FaceBytesService()
+    face_bytes_service.update_face(model)
+    return Message("Face was successfully updated.").__dict__, 200
 
 
 def resize(pic):
