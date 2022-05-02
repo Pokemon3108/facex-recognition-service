@@ -7,8 +7,8 @@ from PIL import Image
 from bson import Binary
 from io import BytesIO
 
-from service.databaseservice.face_bytes_model import FaceBytesModel
-from service.faceservice.model.face_coordinates_model import FaceCoordinatesModel
+from service.databaseservice.FaceBytesModel import FaceBytesModel
+from service.faceservice.model.FaceCoordinatesModel import FaceCoordinatesModel
 
 
 class ModelConverter:

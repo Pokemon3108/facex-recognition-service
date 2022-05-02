@@ -1,9 +1,9 @@
 from flask import jsonify
 
 from app import app
-from exception.duplicate_username_exception import DuplicateUsernameException
-from exception.many_faces_exception import ManyFacesException
-from exception.not_found_exception import NotFoundException
+from exception.DuplicateUsernameException import DuplicateUsernameException
+from exception.ManyFacesException import ManyFacesException
+from exception.NotFoundException import NotFoundException
 
 
 @app.errorhandler(NotFoundException)

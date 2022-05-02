@@ -1,6 +1,6 @@
-from exception.duplicate_username_exception import DuplicateUsernameException
-from service.databaseservice.face_bytes_model import FaceBytesModel
-from service.databaseservice.face_db_service import FaceDbService
+from exception.DuplicateUsernameException import DuplicateUsernameException
+from service.databaseservice.FaceBytesModel import FaceBytesModel
+from service.databaseservice.FaceDbService import FaceDbService
 
 
 class FaceBytesService:

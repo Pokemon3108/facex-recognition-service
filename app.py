@@ -6,19 +6,19 @@ import numpy as np
 from PIL import Image
 from flask import Flask, request, jsonify
 
-from exception.many_faces_exception import ManyFacesException
-from exception.not_found_exception import NotFoundException
-from service.databaseservice.face_bytes_model import FaceBytesModel
-from service.faceservice.detection.face_detector import FaceDetector
+from exception.ManyFacesException import ManyFacesException
+from exception.NotFoundException import NotFoundException
+from service.databaseservice.FaceBytesModel import FaceBytesModel
+from service.faceservice.detection.FaceDetector import FaceDetector
 from service.faceservice.FaceBytesService import FaceBytesService
 from service.faceservice.ModelConverter import ModelConverter
 from service.faceservice.recognition.Classifier import Classifier
 from service.faceservice.recognition.DistanceService import DistanceService
 from service.faceservice.recognition.FaceRecognizer import FaceRecognizer
 from service.faceservice.FaceValidator import FaceValidator
-from service.imageservice.image_processor import ImageProcessor
-from web.response_model.message_model import Message
-from web.response_model.recognized_name_model import RecognizedNameModel
+from service.imageservice.ImageProcessor import ImageProcessor
+from web.response_model.Message import Message
+from web.response_model.RecognizedNameModel import RecognizedNameModel
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}

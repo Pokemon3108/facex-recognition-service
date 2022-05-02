@@ -1,4 +1,4 @@
-from service.faceservice.detection.face_detector import FaceDetector
+from service.faceservice.detection.FaceDetector import FaceDetector
 
 
 class FaceValidator:

@@ -1,5 +1,5 @@
-from service.databaseservice.connector import MongoConnector
-from service.databaseservice.face_bytes_model import FaceBytesModel
+from service.databaseservice.MongoConnector import MongoConnector
+from service.databaseservice.FaceBytesModel import FaceBytesModel
 
 
 class FaceDbService:
