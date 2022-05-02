@@ -1,21 +1,18 @@
-import numpy as np
-from keras import Input, Model, layers
-from keras.layers import Dense
-import tensorflow as tf
+from keras import layers
+from keras.models import Model
 
-from teacher import EmbeddingLayerBuilder
-from teacher.DistanceLayer import DistanceLayer
+from service.faceservice.recognition.networkstructure.DistanceLayer import DistanceLayer
+from service.faceservice.recognition.networkstructure.EmbeddedLayerBuilder import EmbeddedLayerBuilder
 
 
-class SiameseModel:
+class SiameseModelBuilder:
 
     def __init__(self):
-        self.__embedding_layer_builder = EmbeddingLayerBuilder()
+        self.__embedded_layer_builder = EmbeddedLayerBuilder()
 
     def get_siamese_model(self, input_shape):
-        # Anchor image input in the network
 
-        embedded_layer = self.__embedding_layer_builder.build_layer(input_shape)
+        embedded_layer = self.__embedded_layer_builder.build_layer(input_shape)
 
         anchor_input = layers.Input(input_shape, name="Anchor_Input")
         positive_input = layers.Input(input_shape, name="Positive_Input")

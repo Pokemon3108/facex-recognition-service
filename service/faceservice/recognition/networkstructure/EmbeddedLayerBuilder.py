@@ -5,7 +5,7 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 import tensorflow as tf
 
 
-class EmbeddingLayerBuilder:
+class EmbeddedLayerBuilder:
 
     def build_layer(self, input_shape):
         pretrained_model = Xception(

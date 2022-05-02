@@ -1,12 +1,13 @@
 import numpy as np
 from keras.applications.inception_v3 import preprocess_input
 
-from service.faceservice.recognition.classifier import Classifier
+from service.faceservice.recognition.Classifier import Classifier
 
 
 class FaceRecognizer:
 
-    __classifier = Classifier()
+    def __init__(self):
+        self.__classifier = Classifier()
 
     def recognize(self, opencv_image, known_faces_arr):
         image_for_recognize_np = np.array([opencv_image])

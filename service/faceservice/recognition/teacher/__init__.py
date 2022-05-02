@@ -1,8 +1,4 @@
-from teacher.BatchGenerator import BatchGenerator
-from teacher.EmbeddingLayerBuilder import EmbeddingLayerBuilder
-from teacher.FileService import FileService
-from teacher.SiameseModel import SiameseModel
-from teacher.Trainer import Trainer
+from service.faceservice.recognition.teacher.FileService import FileService
 
 ROOT = "../archive/Extracted Faces/Extracted Faces"
 
