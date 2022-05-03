@@ -1,10 +1,11 @@
 import tensorflow as tf
+from injectable import injectable
 from keras import Sequential, layers
 from keras.applications.xception import Xception
 
 from service.faceservice.recognition.ShapeModel import ShapeModel
 
-
+@injectable
 class EmbeddedLayerBuilder:
 
     def build_layer(self, input_shape):
