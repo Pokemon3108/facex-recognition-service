@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from PIL import Image
 from flask import Flask, request, jsonify
+from injectable import load_injection_container
 
 from exception.ManyFacesException import ManyFacesException
 from exception.NotFoundException import NotFoundException
@@ -28,9 +29,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.run(debug=True)
 
 
-@app.route('/')
-def ping():
-    return 'Hello, World!'
+@app.before_first_request
+def init():
+    load_injection_container()
 
 
 @app.route('/api/v1/detection', methods=['POST'])

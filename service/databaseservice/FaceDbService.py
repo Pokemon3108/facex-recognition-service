@@ -1,7 +1,9 @@
+from injectable import injectable
+
 from service.databaseservice.MongoConnector import MongoConnector
 from service.databaseservice.FaceBytesModel import FaceBytesModel
 
-
+@injectable
 class FaceDbService:
     __connector = MongoConnector(db_name='facex',
                                  collection_name='faceData',

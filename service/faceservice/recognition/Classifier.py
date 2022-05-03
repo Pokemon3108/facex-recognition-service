@@ -1,4 +1,5 @@
 import numpy as np
+from injectable import load_injection_container
 
 from service.faceservice.recognition.networkstructure.EmbeddedLayerBuilder import EmbeddedLayerBuilder
 from service.faceservice.recognition.networkstructure.SiameseModel import SiameseModel

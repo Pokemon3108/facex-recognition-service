@@ -1,6 +1,8 @@
 import cv2
+from injectable import injectable
 
 
+@injectable
 class FaceDetector:
     __cascade_path = "./cascade/haarcascade_frontalface_default.xml"
 

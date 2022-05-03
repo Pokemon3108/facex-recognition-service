@@ -4,7 +4,10 @@ from pathlib import Path
 import cv2
 import random
 
+from injectable import injectable
 
+
+@injectable
 class FileService:
 
     def __init__(self, root_folder) -> None:
