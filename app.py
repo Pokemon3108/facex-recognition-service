@@ -9,13 +9,13 @@ from flask import Flask, request, jsonify
 from exception.ManyFacesException import ManyFacesException
 from exception.NotFoundException import NotFoundException
 from service.databaseservice.FaceBytesModel import FaceBytesModel
-from service.faceservice.detection.FaceDetector import FaceDetector
 from service.faceservice.FaceBytesService import FaceBytesService
+from service.faceservice.FaceValidator import FaceValidator
 from service.faceservice.ModelConverter import ModelConverter
-from service.faceservice.recognition.Classifier import Classifier
+from service.faceservice.detection.FaceDetector import FaceDetector
 from service.faceservice.recognition.DistanceService import DistanceService
 from service.faceservice.recognition.FaceRecognizer import FaceRecognizer
-from service.faceservice.FaceValidator import FaceValidator
+from service.faceservice.recognition.ShapeModel import ShapeModel
 from service.imageservice.ImageProcessor import ImageProcessor
 from web.response_model.Message import Message
 from web.response_model.RecognizedNameModel import RecognizedNameModel
@@ -26,6 +26,7 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.run(debug=True)
+
 
 @app.route('/')
 def ping():
@@ -132,8 +133,5 @@ def resize(pic):
     model_converter = ModelConverter()
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
 
-    classifier = Classifier()
     image_processor = ImageProcessor()
-    return image_processor.resize(opencv_image, classifier.get_weight(), classifier.get_height())
-
-import web.error_processor
+    return image_processor.resize(opencv_image, ShapeModel.get_weight(), ShapeModel.get_height())

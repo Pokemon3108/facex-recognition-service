@@ -1,8 +1,8 @@
-from keras import Input, Model, Sequential, layers
-from keras.applications.xception import Xception
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
-
 import tensorflow as tf
+from keras import Sequential, layers
+from keras.applications.xception import Xception
+
+from service.faceservice.recognition.ShapeModel import ShapeModel
 
 
 class EmbeddedLayerBuilder:
@@ -27,3 +27,13 @@ class EmbeddedLayerBuilder:
             layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
         ], name="Encode_Model")
         return encode_model
+
+
+    def copy_weight_to_embedded_layer(self, model):
+        layer_encoder = self.build_layer((ShapeModel.get_weight(), ShapeModel.get_height(), ShapeModel.get_channels_amount()))
+        i = 0
+        for e_layer in model.layers[0].layers[3].layers:
+            layer_weight = e_layer.get_weights()
+            layer_encoder.layers[i].set_weights(layer_weight)
+            i += 1
+        return layer_encoder

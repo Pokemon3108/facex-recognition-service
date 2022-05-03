@@ -2,8 +2,8 @@ import numpy as np
 import tensorflow as tf
 from keras import metrics
 
-from teacher import BatchGenerator, FileService
-from teacher.LearningTester import LearningTester
+from service.faceservice.recognition.teacher import BatchGenerator
+from service.faceservice.recognition.teacher.LearningTester import LearningTester
 
 
 class Trainer:

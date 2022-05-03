@@ -7,26 +7,9 @@ from service.faceservice.recognition.networkstructure.SiameseModelBuilder import
 
 class Classifier:
 
-    def __init__(self):
+    def __init__(self, encoder):
         self.__embedded_layer_builder = EmbeddedLayerBuilder()
-        self.__weight = 128
-        self.__height = 128
-        self.__channels_amount = 3
-
-    def get_weight(self):
-        return self.__weight
-
-    def get_height(self):
-        return self.__height
-
-    def extract_encoder(self, model):
-        layer_encoder = self.__embedded_layer_builder.build_layer((self.__weight, self.__height, self.__channels_amount))
-        i = 0
-        for e_layer in model.layers[0].layers[3].layers:
-            layer_weight = e_layer.get_weights()
-            layer_encoder.layers[i].set_weights(layer_weight)
-            i += 1
-        return layer_encoder
+        self.__encoder = encoder
 
     def classify_images(self, face_list1, face_list2, threshold=0.9):
         # Getting the encodings for the passed faces
@@ -38,13 +21,12 @@ class Classifier:
         return prediction
 
 
-siamese_network = SiameseModelBuilder().get_siamese_model(input_shape=(128,128,3))
+siamese_network = SiameseModelBuilder().get_siamese_model()
 siamese_network.summary()
 siamese_model = SiameseModel(siamese_network)
 siamese_model.load_weights("siamese_model-final")
 
-
-classifier = Classifier()
-encoder = classifier.extract_encoder(siamese_model)
+embedded_layer_builder = EmbeddedLayerBuilder()
+encoder = embedded_layer_builder.copy_weight_to_embedded_layer(siamese_model)
 encoder.save_weights("encoder")
 encoder.summary()

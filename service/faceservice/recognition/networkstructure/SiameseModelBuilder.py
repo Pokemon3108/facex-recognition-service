@@ -1,6 +1,7 @@
 from keras import layers
 from keras.models import Model
 
+from service.faceservice.recognition.ShapeModel import ShapeModel
 from service.faceservice.recognition.networkstructure.DistanceLayer import DistanceLayer
 from service.faceservice.recognition.networkstructure.EmbeddedLayerBuilder import EmbeddedLayerBuilder
 
@@ -10,7 +11,9 @@ class SiameseModelBuilder:
     def __init__(self):
         self.__embedded_layer_builder = EmbeddedLayerBuilder()
 
-    def get_siamese_model(self, input_shape):
+    def get_siamese_model(self, input_shape=(
+            ShapeModel.get_weight(), ShapeModel.get_height(), ShapeModel.get_channels_amount())
+                          ):
 
         embedded_layer = self.__embedded_layer_builder.build_layer(input_shape)
 
