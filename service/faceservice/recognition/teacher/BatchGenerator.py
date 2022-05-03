@@ -4,12 +4,16 @@ import random
 import cv2
 import numpy as np
 import tensorflow as tf
+from injectable import Autowired, injectable
 from keras.applications.inception_v3 import preprocess_input
 
+from service.faceservice.recognition.teacher import FileService
 
+
+@injectable
 class BatchGenerator:
 
-    def __init__(self, file_service) -> None:
+    def __init__(self, file_service : Autowired(FileService)) -> None:
         self.__file_service = file_service
 
     def get_batch(self, triplet_list, batch_size=256, preprocess=True):
