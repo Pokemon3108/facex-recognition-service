@@ -16,15 +16,16 @@ class FaceDbService:
         doc = self.__connector.search(search_criteria)
         if doc is None:
             return None
-        return FaceBytesModel(doc['name'], doc['bytes'])
+        return FaceBytesModel(doc['name'], doc['bytes'], doc['group'])
 
-    def get_all_faces(self) -> list[FaceBytesModel]:
-        cursor = self.__connector.read_all()
+    def get_faces_by_group(self, group) -> list[FaceBytesModel] | None:
+        search_criteria = {'group': group}
+        cursor = self.__connector.search_all(search_criteria)
+        if cursor is None:
+            return None
         faces_model_arr = []
         for doc in cursor:
-            face_name = doc['name']
-            faces_bytes_str = doc['bytes']
-            faces_model_arr.append(FaceBytesModel(face_name, faces_bytes_str))
+            faces_model_arr.append(FaceBytesModel(doc['name'], doc['bytes'], doc['group']))
         return faces_model_arr
 
     def update_face_bytes(self, face_model: FaceBytesModel):
@@ -32,4 +33,4 @@ class FaceDbService:
         doc = self.__connector.update(update_criteria[0], update_criteria[1])
         if doc is None:
             return None
-        return FaceBytesModel(doc['name'], doc['bytes'])
+        return FaceBytesModel(doc['name'], doc['bytes'], doc['group'])

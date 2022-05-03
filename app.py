@@ -49,8 +49,8 @@ def detect():
     return json.dumps([fm.__dict__ for fm in face_models]), 200
 
 
-@app.route('/api/v1/recognition', methods=['POST'])
-def recognize():
+@app.route('/api/v1/recognition/<group>', methods=['POST'])
+def recognize(group):
     model_converter = ModelConverter()
     face_validator = FaceValidator()
 
@@ -61,7 +61,7 @@ def recognize():
         raise ManyFacesException("There are no faces on image or more than 1.")
 
     face_bytes_service = FaceBytesService()
-    known_faces = face_bytes_service.read_all_faces()
+    known_faces = face_bytes_service.read_all_faces_by_group(group)
     known_faces_arr = list(map(lambda model: model_converter.extract_np_faces_bytes_from_model(model), known_faces))
 
     face_recognizer = FaceRecognizer()
@@ -103,13 +103,13 @@ def check_if_user_is_real(name):
     return recognized_name_model.__dict__, 200
 
 
-@app.route('/api/v1/user/<name>', methods=['POST'])
-def upload_user_face(name):
+@app.route('/api/v1/user/<name>/group/<group>', methods=['POST'])
+def upload_user_face(name, group):
     pic = request.files['pic']
     opencv_resized_image = resize(pic)
 
     model_converter = ModelConverter()
-    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_resized_image))
+    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_resized_image), group)
 
     face_bytes_service = FaceBytesService()
     face_bytes_service.save_face(model)

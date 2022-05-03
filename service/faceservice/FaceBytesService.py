@@ -1,4 +1,5 @@
 from exception.DuplicateUsernameException import DuplicateUsernameException
+from exception.NotFoundException import NotFoundException
 from service.databaseservice.FaceBytesModel import FaceBytesModel
 from service.databaseservice.FaceDbService import FaceDbService
 
@@ -9,8 +10,10 @@ class FaceBytesService:
     def read_face_by_username(self, username):
         return self.face_db_service.get_face_by_username(username)
 
-    def read_all_faces(self):
-        return self.face_db_service.get_all_faces()
+    def read_all_faces_by_group(self, group):
+        faces = self.face_db_service.get_faces_by_group(group)
+        if faces is None:
+            raise NotFoundException(f'The group {group} not exists.')
 
     def save_face(self, face_model):
         if self.read_face_by_username(face_model.name) is None:
