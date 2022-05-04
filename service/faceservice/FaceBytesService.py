@@ -18,7 +18,7 @@ class FaceBytesService:
     def read_all_faces_by_group(self, group):
         faces = self.__face_db_service.get_faces_by_group(group)
         if faces is None:
-            raise NotFoundException(f'The group {group} not exists.')
+            raise NotFoundException(f'The group {group} does not exist.')
         return faces
 
     def save_face(self, face_model):
@@ -28,4 +28,7 @@ class FaceBytesService:
             raise DuplicateUsernameException("Person with this name already exists.")
 
     def update_face(self, face_model: FaceBytesModel):
-        return self.__face_db_service.update_face_bytes(face_model)
+        new_model = self.__face_db_service.update_face_bytes(face_model)
+        if new_model is None:
+            raise NotFoundException(f'Face with name {face_model.name} does not exist.')
+        return new_model

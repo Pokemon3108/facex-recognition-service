@@ -29,7 +29,6 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.run(debug=True)
 
-
 load_injection_container()
 face_db_service = FaceDbService()
 face_bytes_service = FaceBytesService()
@@ -39,6 +38,7 @@ model_converter = ModelConverter()
 face_validator = FaceValidator()
 image_processor = ImageProcessor()
 face_detector = FaceDetector()
+
 
 @app.route('/api/v1/detection', methods=['POST'])
 def detect():
@@ -53,11 +53,9 @@ def detect():
 
 @app.route('/api/v1/recognition/group/<group>', methods=['POST'])
 def recognize(group):
-
     pic = request.files['pic']
-    validated_img = validate(pic)
-
-    opencv_image = process_image(validated_img)
+    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+    validate(opencv_image)
 
     known_faces = face_bytes_service.read_all_faces_by_group(group)
     known_faces_arr = list(map(lambda model: model_converter.extract_np_faces_bytes_from_model(model), known_faces))
@@ -79,17 +77,12 @@ def check_if_user_is_real(name):
     pic = request.files['pic']
 
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
-
-    if not face_validator.is_one_face_on_image(opencv_image):
-        raise ManyFacesException("There are no faces on image or more than 1.")
+    validate(opencv_image)
+    opencv_processed_image = process_image(opencv_image)
 
     face_bytes_model_db = face_bytes_service.read_face_by_username(name)
-    if face_bytes_model_db is None:
-        raise NotFoundException("No face of this username was found in database.")
-    face_bytes_np = [model_converter.extract_np_faces_bytes_from_model(face_bytes_model_db)]
-
-    opencv_processed_image = process_image(opencv_image)
-    distance_arr = face_recognizer.recognize(opencv_processed_image, face_bytes_np)
+    distance_arr = face_recognizer.recognize_pair_opencv_img(
+        opencv_processed_image, model_converter.extract_np_faces_bytes_from_model(face_bytes_model_db))
 
     face_matches_username = distance_service.check_if_distance_is_small(distance_arr[0])
 
@@ -98,12 +91,32 @@ def check_if_user_is_real(name):
     return recognized_name_model.__dict__, 200
 
 
+@app.route('/api/v1/recognition/pair', methods=['POST'])
+def compare_to_images():
+    pic1 = request.files['pic1']
+    pic2 = request.files['pic2']
+
+    opencv_image1 = model_converter.file_storage_to_opencv_image(pic1)
+    validate(opencv_image1)
+    opencv_image2 = model_converter.file_storage_to_opencv_image(pic2)
+    validate(opencv_image2)
+
+    opencv_processed_image1 = process_image(opencv_image1)
+    opencv_processed_image2 = process_image(opencv_image2)
+    distance_arr = face_recognizer.recognize_pair_opencv_img(opencv_processed_image1, opencv_processed_image2)
+
+    is_one_person = distance_service.check_if_distance_is_small(distance_arr[0])
+
+    return {'isOnePerson': is_one_person}, 200
+
+
 @app.route('/api/v1/user/<name>/group/<group>', methods=['POST'])
 def upload_user_face(name, group):
     pic = request.files['pic']
-    validated_img = validate(pic)
+    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+    validate(opencv_image)
 
-    processed_image = process_image(validated_img)
+    processed_image = process_image(opencv_image)
 
     model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(processed_image), group)
 
@@ -114,9 +127,10 @@ def upload_user_face(name, group):
 @app.route('/api/v1/user/<name>', methods=['PUT'])
 def update_user_face(name):
     pic = request.files['pic']
-    validated_img = validate(pic)
+    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+    validate(opencv_image)
 
-    opencv_processed_image = process_image(validated_img)
+    opencv_processed_image = process_image(opencv_image)
 
     model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_processed_image))
 
@@ -124,16 +138,12 @@ def update_user_face(name):
     return Message("Face was successfully updated.").__dict__, 200
 
 
-def validate(pic):
-
-    opencv_image = model_converter.file_storage_to_opencv_image(pic)
+def validate(opencv_image):
     if not face_validator.is_one_face_on_image(opencv_image):
         raise ManyFacesException("There are no faces on image or more than 1.")
-    return opencv_image
 
 
 def process_image(opencv_image):
-
     faces = image_processor.extract_face(opencv_image)
     return image_processor.resize(faces[0], ShapeModel.get_weight(), ShapeModel.get_height())
 

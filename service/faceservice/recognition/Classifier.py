@@ -18,6 +18,7 @@ class Classifier:
         tensor2 = encoder.predict(face_list2)
 
         distance = np.sum(np.square(tensor1 - tensor2), axis=-1)
+        print(distance)
         prediction = np.where(distance <= threshold, distance, 1)
         return prediction
 
