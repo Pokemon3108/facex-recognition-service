@@ -5,10 +5,12 @@ from service.databaseservice.FaceBytesModel import FaceBytesModel
 
 @injectable
 class FaceDbService:
-    __connector = MongoConnector(db_name='facex',
-                                 collection_name='faceData',
-                                 hostname="localhost",
-                                 port=27017)
+
+    def __init__(self):
+        self.__connector = MongoConnector(db_name='facex',
+                                     collection_name='faceData',
+                                     hostname="localhost",
+                                     port=27017)
 
     def save_known_face(self, obj_to_save):
         self.__connector.save(obj_to_save)

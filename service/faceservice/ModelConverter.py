@@ -7,15 +7,17 @@ from PIL import Image
 from bson import Binary
 from io import BytesIO
 
+from injectable import injectable
+
 from service.databaseservice.FaceBytesModel import FaceBytesModel
 from service.faceservice.model.FaceCoordinatesModel import FaceCoordinatesModel
 
-
+@injectable
 class ModelConverter:
 
     def build_models_face_coordinates(self, coordinates):
         face_models = []
-        for (x, y, w, h) in coordinates:
+        for x, y, w, h in coordinates:
             face_model = FaceCoordinatesModel(x, y, w, h)
             face_models.append(face_model)
         return face_models
