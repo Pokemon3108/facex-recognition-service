@@ -51,9 +51,9 @@ def detect():
     return json.dumps([fm.__dict__ for fm in face_models]), 200
 
 
-@app.route('/api/v1/recognition/<group>', methods=['POST'])
+@app.route('/api/v1/recognition/group/<group>', methods=['POST'])
 def recognize(group):
-    model_converter = ModelConverter()
+
     pic = request.files['pic']
     validated_img = validate(pic)
 
@@ -105,7 +105,7 @@ def upload_user_face(name, group):
 
     processed_image = process_image(validated_img)
 
-    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(processed_image[0]), group)
+    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(processed_image), group)
 
     face_bytes_service.save_face(model)
     return Message("Face was successfully loaded.").__dict__, 200
@@ -127,8 +127,6 @@ def update_user_face(name):
 def validate(pic):
 
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
-    print('1111')
-    print(opencv_image.shape)
     if not face_validator.is_one_face_on_image(opencv_image):
         raise ManyFacesException("There are no faces on image or more than 1.")
     return opencv_image
@@ -137,8 +135,6 @@ def validate(pic):
 def process_image(opencv_image):
 
     faces = image_processor.extract_face(opencv_image)
-    print('222')
-    print(faces[0].shape)
     return image_processor.resize(faces[0], ShapeModel.get_weight(), ShapeModel.get_height())
 
 

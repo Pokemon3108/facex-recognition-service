@@ -23,7 +23,7 @@ class FaceDbService:
         return FaceBytesModel(doc['name'], doc['bytes'], doc['group'])
 
     def get_faces_by_group(self, group) -> list[FaceBytesModel] | None:
-        search_criteria = {'group': group}
+        search_criteria = {'group': str(group)}
         cursor = self.__connector.search_all(search_criteria)
         if cursor is None:
             return None

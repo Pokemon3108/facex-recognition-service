@@ -19,6 +19,7 @@ class FaceBytesService:
         faces = self.__face_db_service.get_faces_by_group(group)
         if faces is None:
             raise NotFoundException(f'The group {group} not exists.')
+        return faces
 
     def save_face(self, face_model):
         if self.read_face_by_username(face_model.name) is None:
