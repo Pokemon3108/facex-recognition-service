@@ -13,7 +13,10 @@ class FaceBytesService:
         self.__face_db_service = face_db_service
 
     def read_face_by_username(self, username):
-        return self.__face_db_service.get_face_by_username(username)
+        face = self.__face_db_service.get_face_by_username(username)
+        if face is None:
+            raise NotFoundException(f'The user with name {username} does not exist.')
+        return face
 
     def read_all_faces_by_group(self, group):
         faces = self.__face_db_service.get_faces_by_group(group)
