@@ -8,16 +8,21 @@ from service.faceservice.recognition.networkstructure.SiameseModelBuilder import
 
 class Classifier:
 
-    def __init__(self, encoder):
-        self.__embedded_layer_builder = EmbeddedLayerBuilder()
-        self.__encoder = encoder
-
     def classify_images(self, face_list1, face_list2, threshold=0.9):
         # Getting the encodings for the passed faces
         tensor1 = encoder.predict(face_list1)
         tensor2 = encoder.predict(face_list2)
 
         distance = np.sum(np.square(tensor1 - tensor2), axis=-1)
+        print(distance)
+        prediction = np.where(distance <= threshold, distance, 1)
+        return prediction
+
+    def classify_image_and_tensor(self, face_list1, tensor, threshold=0.9):
+        # Getting the encodings for the passed faces
+        tensor1 = encoder.predict(face_list1)
+
+        distance = np.sum(np.square(tensor1 - tensor), axis=-1)
         print(distance)
         prediction = np.where(distance <= threshold, distance, 1)
         return prediction

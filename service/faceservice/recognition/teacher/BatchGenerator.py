@@ -43,37 +43,4 @@ class BatchGenerator:
 
             yield ([anchor, positive, negative])
 
-    def create_triplets(self, directory, folder_list, max_files=10):
-        triplets = []
-        folders = list(folder_list.keys())
 
-        for folder in folders:
-            path = os.path.join(directory, folder)
-            files = list(os.listdir(path))[:max_files]
-            num_files = len(files)
-
-            for i in range(num_files - 1):
-                for j in range(i + 1, num_files):
-                    anchor = (folder, f"{i}.jpg")
-                    positive = (folder, f"{j}.jpg")
-
-                    neg_folder = folder
-                    while neg_folder == folder:
-                        neg_folder = random.choice(folders)
-                    neg_file = random.randint(0, folder_list[neg_folder] - 1)
-                    negative = (neg_folder, f"{neg_file}.jpg")
-
-                    triplets.append((anchor, positive, negative))
-
-        random.shuffle(triplets)
-        return triplets
-
-    def preprocess(self, byte_img):
-
-        # Load in the image
-        processed_img = cv2.resize(byte_img, (100, 100))
-        # Scale image to be between 0 and 1
-        processed_img = processed_img / 255.0
-
-        # Return image
-        return processed_img

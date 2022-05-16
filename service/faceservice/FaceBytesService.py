@@ -12,8 +12,8 @@ class FaceBytesService:
     def __init__(self, face_db_service : Autowired(FaceDbService)):
         self.__face_db_service = face_db_service
 
-    def read_face_by_username(self, username):
-        face = self.__face_db_service.get_face_by_username(username)
+    def read_face_by_username_and_group(self, username, group):
+        face = self.__face_db_service.get_face_by_username_and_group(username, group)
         if face is None:
             raise NotFoundException(f'The user with name {username} does not exist.')
         return face
@@ -25,7 +25,7 @@ class FaceBytesService:
         return faces
 
     def save_face(self, face_model):
-        if self.read_face_by_username(face_model.name) is None:
+        if self.__face_db_service.get_face_by_username_and_group(face_model.name, face_model.group) is None:
             return self.__face_db_service.save_known_face(face_model.__dict__)
         else:
             raise DuplicateUsernameException("Person with this name already exists.")

@@ -15,8 +15,8 @@ class FaceDbService:
     def save_known_face(self, obj_to_save):
         self.__connector.save(obj_to_save)
 
-    def get_face_by_username(self, username) -> FaceBytesModel | None:
-        search_criteria = {'name': username}
+    def get_face_by_username_and_group(self, username, group) -> FaceBytesModel | None:
+        search_criteria = {'name': username, 'group': group}
         doc = self.__connector.search(search_criteria)
         if doc is None:
             return None

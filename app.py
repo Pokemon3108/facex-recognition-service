@@ -72,15 +72,15 @@ def recognize(group):
     return jsonify(recognized_name_model.__dict__), 200
 
 
-@app.route('/api/v1/recognition/user/<name>', methods=['POST'])
-def check_if_user_is_real(name):
+@app.route('/api/v1/recognition/user/<name>/group/<group>', methods=['POST'])
+def check_if_user_is_real(name, group):
     pic = request.files['pic']
 
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
     validate(opencv_image)
     opencv_processed_image = process_image(opencv_image)
 
-    face_bytes_model_db = face_bytes_service.read_face_by_username(name)
+    face_bytes_model_db = face_bytes_service.read_face_by_username_and_group(name, group)
     distance_arr = face_recognizer.recognize_pair_opencv_img(
         opencv_processed_image, model_converter.extract_np_faces_bytes_from_model(face_bytes_model_db))
 
@@ -92,7 +92,7 @@ def check_if_user_is_real(name):
 
 
 @app.route('/api/v1/recognition/pair', methods=['POST'])
-def compare_to_images():
+def compare_two_images():
     pic1 = request.files['pic1']
     pic2 = request.files['pic2']
 
@@ -124,15 +124,15 @@ def upload_user_face(name, group):
     return Message("Face was successfully loaded.").__dict__, 200
 
 
-@app.route('/api/v1/user/<name>', methods=['PUT'])
-def update_user_face(name):
+@app.route('/api/v1/user/<name>/group/<group>', methods=['PATCH'])
+def update_user_face(name, group):
     pic = request.files['pic']
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
     validate(opencv_image)
 
     opencv_processed_image = process_image(opencv_image)
 
-    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_processed_image))
+    model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_processed_image), group)
 
     face_bytes_service.update_face(model)
     return Message("Face was successfully updated.").__dict__, 200
@@ -145,7 +145,7 @@ def validate(opencv_image):
 
 def process_image(opencv_image):
     faces = image_processor.extract_face(opencv_image)
-    return image_processor.resize(faces[0], ShapeModel.get_weight(), ShapeModel.get_height())
+    return image_processor.resize(faces[0], ShapeModel.get_width(), ShapeModel.get_height())
 
 
 import web.error_processor

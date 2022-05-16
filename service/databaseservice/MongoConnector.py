@@ -17,9 +17,6 @@ class MongoConnector:
     def search_all(self, search_criteria):
         return self.__collection.find(search_criteria)
 
-    def read_all(self):
-        return self.__collection.find({})
-
     def update(self, filter_criteria, update_criteria):
         return self.__collection.find_one_and_update(filter_criteria, update_criteria)
 

@@ -1,7 +1,7 @@
 class ShapeModel(object):
 
     @staticmethod
-    def get_weight():
+    def get_width():
         return 128
 
     @staticmethod

@@ -14,8 +14,8 @@ class FileService:
         super().__init__()
         self.__root = root_folder
 
-    def read_image(self, index):
-        path = os.path.join(self.__root, index[0], index[1])
+    def read_image(self, index_path):
+        path = os.path.join(self.__root, index_path[0], index_path[1])
         image = cv2.imread(path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image

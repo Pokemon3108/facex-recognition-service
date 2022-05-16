@@ -9,9 +9,8 @@ from service.faceservice.recognition.networkstructure.EmbeddedLayerBuilder impor
 @injectable
 class FaceRecognizer:
 
-    @autowired
-    def __init__(self, embedded_layer_builder: Autowired(EmbeddedLayerBuilder)):
-        self.__classifier = Classifier(embedded_layer_builder)
+    def __init__(self):
+        self.__classifier = Classifier()
 
     def recognize(self, opencv_image, known_faces_arr):
         image_for_recognize_np = np.array([opencv_image])

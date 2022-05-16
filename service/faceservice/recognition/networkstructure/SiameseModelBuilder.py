@@ -12,7 +12,7 @@ class SiameseModelBuilder:
         self.__embedded_layer_builder = EmbeddedLayerBuilder()
 
     def get_siamese_model(self, input_shape=(
-            ShapeModel.get_weight(), ShapeModel.get_height(), ShapeModel.get_channels_amount())
+            ShapeModel.get_width(), ShapeModel.get_height(), ShapeModel.get_channels_amount())
                           ):
 
         embedded_layer = self.__embedded_layer_builder.build_layer(input_shape)

@@ -31,7 +31,7 @@ class EmbeddedLayerBuilder:
 
 
     def copy_weight_to_embedded_layer(self, model):
-        layer_encoder = self.build_layer((ShapeModel.get_weight(), ShapeModel.get_height(), ShapeModel.get_channels_amount()))
+        layer_encoder = self.build_layer((ShapeModel.get_width(), ShapeModel.get_height(), ShapeModel.get_channels_amount()))
         i = 0
         for e_layer in model.layers[0].layers[3].layers:
             layer_weight = e_layer.get_weights()
