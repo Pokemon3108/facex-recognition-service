@@ -1,10 +1,9 @@
-import cv2
 import numpy as np
-from injectable import injectable, Autowired, autowired
+from injectable import injectable
 from keras.applications.inception_v3 import preprocess_input
 
 from service.faceservice.recognition.Classifier import Classifier
-from service.faceservice.recognition.networkstructure.EmbeddedLayerBuilder import EmbeddedLayerBuilder
+
 
 @injectable
 class FaceRecognizer:

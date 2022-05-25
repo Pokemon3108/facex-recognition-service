@@ -10,13 +10,13 @@ from service.faceservice.recognition.teacher.LearningTester import LearningTeste
 class Trainer:
 
     @autowired
-    def __init__(self, siamese_network, file_service: Autowired(FileService),
-                 batch_generator: Autowired(BatchGenerator)) -> None:
+    def __init__(self, siamese_network,
+                 file_service: Autowired(FileService)) -> None:
         self.siamese_network = siamese_network
         # self.loss_tracker = metrics.Mean(name="loss")
         self.optimizer = tf.keras.optimizers.Adam(1e-4)
         self.__margin = 0.4
-        self.__batch_generator = batch_generator
+        self.__batch_generator = BatchGenerator(file_service)
         self.__file_service = file_service
         self.__learning_tester = LearningTester(self.__batch_generator, siamese_network)
 
@@ -29,7 +29,7 @@ class Trainer:
         self.optimizer.apply_gradients(zip(gradients, self.siamese_network.trainable_weights))
 
         # self.loss_tracker.update_state(loss)
-        return {"loss": loss}
+        return sum(loss) / len(loss)
 
     def train(self, train_list, test_list, root_folder, EPOCHS):
 
@@ -37,7 +37,7 @@ class Trainer:
         test_triplet = self.__file_service.create_triplets(root_folder, test_list)
 
         train_loss = []
-        test_metrics = []
+        test_acc = []
         max_acc = 0
 
         for epoch in range(1, EPOCHS + 1):
@@ -55,14 +55,15 @@ class Trainer:
             print(f"Loss on train    = {epoch_loss:.5f}")
 
             # Testing the model on test data
-            metric = self.__learning_tester.test_on_triplets(test_triplet)
-            test_metrics.append(metric)
-            accuracy = metric[0]
+            accuracy = self.__learning_tester.test_on_triplets(test_triplet)
+            test_acc.append(accuracy)
 
             # Saving the model weights
             if accuracy >= max_acc:
                 self.siamese_network.save_weights("siamese_model")
                 max_acc = accuracy
+            else:
+                self.siamese_network.load_weights("siamese_model")
 
     def _compute_loss(self, data):
         # Get the two distances from the network, then compute the triplet loss

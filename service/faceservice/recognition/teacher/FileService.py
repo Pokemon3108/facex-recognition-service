@@ -1,26 +1,25 @@
 import os
-from pathlib import Path
-
-import cv2
 import random
 
+import cv2
 from injectable import injectable
 
+ROOT = "../archive/Extracted Faces"
 
 @injectable
 class FileService:
 
-    def __init__(self, root_folder) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.__root = root_folder
 
     def read_image(self, index_path):
-        path = os.path.join(self.__root, index_path[0], index_path[1])
+        path = os.path.join(ROOT, index_path[0], index_path[1])
         image = cv2.imread(path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image
 
-    def split_dataset(self, directory):
+    def split_dataset(self):
+        directory = ROOT
         folders = os.listdir(directory)
         num_train = len(folders)
 
@@ -29,12 +28,12 @@ class FileService:
         train_list, test_list = {}, {}
 
         # Creating Train-list
-        for folder in folders[:num_train]:
+        for folder in folders[:int(num_train / 2)]:
             num_files = len(os.listdir(os.path.join(directory, folder)))
             train_list[folder] = num_files
 
         # Creating Test-list
-        for folder in folders[num_train:]:
+        for folder in folders[int(num_train / 2):]:
             num_files = len(os.listdir(os.path.join(directory, folder)))
             test_list[folder] = num_files
 

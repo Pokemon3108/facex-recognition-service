@@ -16,6 +16,7 @@ class EmbeddedLayerBuilder:
             pooling='avg',
         )
 
+
         for i in range(len(pretrained_model.layers) - 27):
             pretrained_model.layers[i].trainable = False
 
@@ -30,7 +31,7 @@ class EmbeddedLayerBuilder:
         return encode_model
 
 
-    def copy_weight_to_embedded_layer(self, model):
+    def copy_weight_to_encode_layer(self, model):
         layer_encoder = self.build_layer((ShapeModel.get_width(), ShapeModel.get_height(), ShapeModel.get_channels_amount()))
         i = 0
         for e_layer in model.layers[0].layers[3].layers:

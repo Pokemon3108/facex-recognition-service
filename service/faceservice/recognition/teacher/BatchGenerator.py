@@ -1,10 +1,5 @@
-import os
-import random
-
-import cv2
 import numpy as np
-import tensorflow as tf
-from injectable import Autowired, injectable
+from injectable import injectable, Autowired
 from keras.applications.inception_v3 import preprocess_input
 
 from service.faceservice.recognition.teacher import FileService
@@ -42,5 +37,3 @@ class BatchGenerator:
                 negative = preprocess_input(negative)
 
             yield ([anchor, positive, negative])
-
-

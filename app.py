@@ -15,9 +15,13 @@ from service.faceservice.FaceBytesService import FaceBytesService
 from service.faceservice.FaceValidator import FaceValidator
 from service.faceservice.ModelConverter import ModelConverter
 from service.faceservice.detection.FaceDetector import FaceDetector
+from service.faceservice.recognition.Classifier import encoder_model
 from service.faceservice.recognition.DistanceService import DistanceService
 from service.faceservice.recognition.FaceRecognizer import FaceRecognizer
 from service.faceservice.recognition.ShapeModel import ShapeModel
+from service.faceservice.recognition.networkstructure.EmbeddedLayerBuilder import EmbeddedLayerBuilder
+from service.faceservice.recognition.networkstructure.SiameseModel import SiameseModel
+from service.faceservice.recognition.networkstructure.SiameseModelBuilder import SiameseModelBuilder
 from service.imageservice.ImageProcessor import ImageProcessor
 from web.response_model.Message import Message
 from web.response_model.RecognizedNameModel import RecognizedNameModel
@@ -60,9 +64,12 @@ def recognize(group):
     known_faces = face_bytes_service.read_all_faces_by_group(group)
     known_faces_arr = list(map(lambda model: model_converter.extract_np_faces_bytes_from_model(model), known_faces))
 
-    opencv_processed_image = process_image(opencv_image)
+    opencv_processed_image = image_processor.extract_resized_face(opencv_image)
 
     distance_arr = face_recognizer.recognize(opencv_processed_image, known_faces_arr)
+
+    if distance_service.arr_consists_of_ones(distance_arr):
+        return Message("Face has not been recognized.").__dict__, 200
 
     min_distance_index = distance_service.get_smallest_distance_index(distance_arr)
     recognized_name = known_faces[min_distance_index].name
@@ -78,7 +85,7 @@ def check_if_user_is_real(name, group):
 
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
     validate(opencv_image)
-    opencv_processed_image = process_image(opencv_image)
+    opencv_processed_image = image_processor.extract_resized_face(opencv_image)
 
     face_bytes_model_db = face_bytes_service.read_face_by_username_and_group(name, group)
     distance_arr = face_recognizer.recognize_pair_opencv_img(
@@ -101,8 +108,8 @@ def compare_two_images():
     opencv_image2 = model_converter.file_storage_to_opencv_image(pic2)
     validate(opencv_image2)
 
-    opencv_processed_image1 = process_image(opencv_image1)
-    opencv_processed_image2 = process_image(opencv_image2)
+    opencv_processed_image1 = image_processor.extract_resized_face(opencv_image1)
+    opencv_processed_image2 = image_processor.extract_resized_face(opencv_image2)
     distance_arr = face_recognizer.recognize_pair_opencv_img(opencv_processed_image1, opencv_processed_image2)
 
     is_one_person = distance_service.check_if_distance_is_small(distance_arr[0])
@@ -116,12 +123,12 @@ def upload_user_face(name, group):
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
     validate(opencv_image)
 
-    processed_image = process_image(opencv_image)
+    processed_image = image_processor.extract_resized_face(opencv_image)
 
     model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(processed_image), group)
 
     face_bytes_service.save_face(model)
-    return Message("Face was successfully loaded.").__dict__, 200
+    return Message("Face was successfully loaded.").__dict__, 201
 
 
 @app.route('/api/v1/user/<name>/group/<group>', methods=['PATCH'])
@@ -130,7 +137,7 @@ def update_user_face(name, group):
     opencv_image = model_converter.file_storage_to_opencv_image(pic)
     validate(opencv_image)
 
-    opencv_processed_image = process_image(opencv_image)
+    opencv_processed_image = image_processor.extract_resized_face(opencv_image)
 
     model = FaceBytesModel(name, model_converter.opencv_image_to_bytes(opencv_processed_image), group)
 
@@ -141,11 +148,6 @@ def update_user_face(name, group):
 def validate(opencv_image):
     if not face_validator.is_one_face_on_image(opencv_image):
         raise ManyFacesException("There are no faces on image or more than 1.")
-
-
-def process_image(opencv_image):
-    faces = image_processor.extract_face(opencv_image)
-    return image_processor.resize(faces[0], ShapeModel.get_width(), ShapeModel.get_height())
 
 
 import web.error_processor

@@ -16,10 +16,6 @@ class LearningTester:
             neg_scores += list(prediction[1])
 
         accuracy = np.sum(np.array(pos_scores) < np.array(neg_scores)) / len(pos_scores)
-        ap_mean = np.mean(pos_scores)
-        an_mean = np.mean(neg_scores)
-        ap_stds = np.std(pos_scores)
-        an_stds = np.std(neg_scores)
 
         print(f"Accuracy on test = {accuracy:.5f}")
-        return (accuracy, ap_mean, an_mean, ap_stds, an_stds)
+        return accuracy
